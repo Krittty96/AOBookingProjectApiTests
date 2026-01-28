@@ -82,4 +82,4 @@ class APIClient:
         with allure.step('Получение и проверка содержимого ответа'):
             booking_data = response.json()
             jsonschema.validate(booking_data, BOOKING_DETAILS_SCHEMA)
-        return response.status_code , booking_data
+        return booking_data
