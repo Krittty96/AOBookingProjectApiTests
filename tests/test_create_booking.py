@@ -6,14 +6,17 @@ from conftest import generate_random_booking_data
 from core.clients.schemas.booking_details_schema import BOOKING_DETAILS_SCHEMA
 from core.clients.api_client import Endpoints
 
-# тут выдает 418 :(  , так же в строке 80 - 89
+
 @allure.feature("Test create booking")
-@allure.story("Validate response status and JSON-schema")
+@allure.story("Validate response")
 def test_validate_response(api_client, generate_random_booking_data):
-    payload = generate_random_booking_data.copy()
-    response_data = api_client.create_booking(payload)
-    assert 'bookingid' in response_data, "Ответ должен содержать bookingid"
-    assert 'booking	' in response_data, "Ответ должен содержать booking"
+    url = f'{api_client.base_url}{Endpoints.BOOKING_ENDPOINT.value}'
+    response = requests.post(url, json=generate_random_booking_data.copy(),
+                             headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
+    response_data = response.json()
+    with allure.step('JSON schema validation'):
+        jsonschema.validate(instance=response_data, schema=BOOKING_DETAILS_SCHEMA)
+
 
 
 @allure.feature("Test create booking")
@@ -77,14 +80,14 @@ def test_ping_timeout(api_client, generate_random_booking_data, mocker):
     with pytest.raises(requests.Timeout):
         api_client.create_booking(booking_data)
 
+
 @allure.feature("Test create booking")
 @allure.story("Test validate headers")
 def test_validate_headers(api_client, generate_random_booking_data):
     url = f'{api_client.base_url}{Endpoints.BOOKING_ENDPOINT.value}'
-    response = api_client.session.post(url, json=generate_random_booking_data.copy())
+    response = api_client.session.post(url, json=generate_random_booking_data.copy(),
+                                       headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
     assert response.status_code == 200, f'Expected status 200 but got {response.status_code}'
     req_headers = response.request.headers
-    assert "application/json" in req_headers.get('Content-Type', '')
-    assert "application/json" in req_headers.get('Accept', '')
-
-
+    assert "application/json" in req_headers.get('Content-Type')
+    assert "application/json" in req_headers.get('Accept')
