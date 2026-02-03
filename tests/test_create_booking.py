@@ -1,0 +1,90 @@
+import allure
+import pytest
+import requests
+import jsonschema
+from conftest import generate_random_booking_data
+from core.clients.schemas.booking_details_schema import BOOKING_DETAILS_SCHEMA
+from core.clients.api_client import Endpoints
+
+# тут выдает 418 :(  , так же в строке 80 - 89
+@allure.feature("Test create booking")
+@allure.story("Validate response status and JSON-schema")
+def test_validate_response(api_client, generate_random_booking_data):
+    payload = generate_random_booking_data.copy()
+    response_data = api_client.create_booking(payload)
+    assert 'bookingid' in response_data, "Ответ должен содержать bookingid"
+    assert 'booking	' in response_data, "Ответ должен содержать booking"
+
+
+@allure.feature("Test create booking")
+@allure.story("Test server unavailability")
+def test_server_unavailable(api_client, generate_random_booking_data, mocker):
+    booking_data = generate_random_booking_data.copy()
+    mocker.patch.object(api_client.session, 'post', side_effect=Exception('Server unavailable'))
+    with pytest.raises(Exception, match='Server unavailable'):
+        api_client.create_booking(booking_data)
+
+
+@allure.feature("Test create booking")
+@allure.story("Test wrong HTTP method")
+def test_wrong_method(api_client, generate_random_booking_data, mocker):
+    mock_response = mocker.Mock()
+    booking_data = generate_random_booking_data.copy()
+    mock_response.status_code = 405
+    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
+    with pytest.raises(AssertionError, match='Expected status 200 but got 405'):
+        api_client.create_booking(booking_data)
+
+
+@allure.feature("Test create booking")
+@allure.story("Test server error")
+def test_server_error(api_client, generate_random_booking_data, mocker):
+    booking_data = generate_random_booking_data.copy()
+    mock_response = mocker.Mock()
+    mock_response.status_code = 500
+    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
+    with pytest.raises(AssertionError, match='Expected status 200 but got 500'):
+        api_client.create_booking(booking_data)
+
+
+@allure.feature("Test create booking")
+@allure.story("Test wrong URL")
+def test_wrong_url(api_client, generate_random_booking_data, mocker):
+    booking_data = generate_random_booking_data.copy()
+    mock_response = mocker.Mock()
+    mock_response.status_code = 404
+    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
+    with pytest.raises(AssertionError, match='Expected status 200 but got 404'):
+        api_client.create_booking(booking_data)
+
+
+@allure.feature("Test create booking")
+@allure.story("Test connection with different success code")
+def test_connection_with_different_success(api_client, generate_random_booking_data, mocker):
+    booking_data = generate_random_booking_data.copy()
+    mock_response = mocker.Mock()
+    mock_response.status_code = 404
+    mocker.patch.object(api_client.session, 'post', return_value=mock_response)
+    with pytest.raises(AssertionError, match='Expected status 200 but got 404'):
+        api_client.create_booking(booking_data)
+
+
+@allure.feature("Test create booking")
+@allure.story("Test timeout")
+def test_ping_timeout(api_client, generate_random_booking_data, mocker):
+    booking_data = generate_random_booking_data.copy()
+    mocker.patch.object(api_client.session, 'post', side_effect=requests.Timeout)
+    with pytest.raises(requests.Timeout):
+        api_client.create_booking(booking_data)
+
+@allure.feature("Test create booking")
+@allure.story("Test validate headers")
+def test_validate_headers(api_client, generate_random_booking_data):
+    url = f'{api_client.base_url}{Endpoints.BOOKING_ENDPOINT.value}'
+    response = api_client.session.post(url, json=generate_random_booking_data.copy())
+    assert response.status_code == 200, f'Expected status 200 but got {response.status_code}'
+    req_headers = response.request.headers
+    assert "application/json" in req_headers.get('Content-Type', '')
+    assert "application/json" in req_headers.get('Accept', '')
+
+
