@@ -1,3 +1,4 @@
+
 from core.clients.api_client import APIClient
 import pytest
 from datetime import datetime , timedelta
@@ -30,10 +31,11 @@ def generate_random_booking_data(booking_dates):
     additionalneeds = faker.sentence()
 
     data = {
-        'first_name': firstname,
-        'last_name': lastname,
+        'firstname': firstname,
+        'lastname': lastname,
         'totalprice': totalprice,
         'depositpaid': depositpaid,
-        'additionalneeds': additionalneeds,
+        'bookingdates': booking_dates,
+        'additionalneeds': additionalneeds
     }
     return data
