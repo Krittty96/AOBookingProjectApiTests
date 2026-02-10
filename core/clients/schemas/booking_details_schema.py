@@ -7,7 +7,7 @@ BOOKING_DETAILS_SCHEMA = {
             'properties': {
                 'firstname': {'type': 'string'},
                 'lastname': {'type': 'string'},
-                'totalprice': {'type': 'number', 'minimum': 1 , 'maximum': 999},
+                'totalprice': {'type': 'number', 'minimum': 0},
                 'depositpaid': {'type': 'boolean'},
                 'bookingdates': {
                     'type': 'object',
