@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         ENVIRONMENT = 'PROD'
-        PROD_BASE_URL=https: '//restful-booker.herokuapp.com'
+        PROD_BASE_URL='https://restful-booker.herokuapp.com'
     }
 
     stages {
