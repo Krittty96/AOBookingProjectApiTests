@@ -60,7 +60,7 @@ def test_create_booking_with_custom_data(api_client):
 
 
 @allure.feature("Test create booking")
-@allure.story("Positive : creating booking with random dates")
+@allure.story("Positive test : creating booking with random dates")
 def test_create_booking_with_random_dates(api_client, generate_random_booking_data, booking_dates):
     booking_data = generate_random_booking_data.copy()
     booking_data['bookingdates'] = booking_dates
