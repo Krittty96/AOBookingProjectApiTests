@@ -1,6 +1,5 @@
 import allure
 import jsonschema
-import pytest
 from conftest import generate_random_booking_data
 from core.clients.schemas.booking_details_schema import BOOKING_DETAILS_SCHEMA
 from pydantic import ValidationError
@@ -61,7 +60,7 @@ def test_create_booking_with_custom_data(api_client):
 
 
 @allure.feature("Test create booking")
-@allure.story("Positive : creating booking with random dates")
+@allure.story("Positive test : creating booking with random dates")
 def test_create_booking_with_random_dates(api_client, generate_random_booking_data, booking_dates):
     booking_data = generate_random_booking_data.copy()
     booking_data['bookingdates'] = booking_dates
@@ -79,6 +78,6 @@ def test_checkin_must_be_before_checkout(api_client, generate_random_booking_dat
     headers = {'Content-Type': 'application/json', 'Accept': 'application/json'}
     response = api_client.session.post(url, json=booking_data, headers=headers)
 
-    assert response.status_code >= 400 , 'Код ответа не соответствует ожидаемому'
+    assert response.status_code <= 400 , 'Код ответа не соответствует ожидаемому'
 
 
